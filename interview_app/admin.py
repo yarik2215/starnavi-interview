@@ -12,16 +12,18 @@ from .models import (
 )
 
 
-class AnswerInline(admin.StackedInline):
+class AnswerInline(admin.TabularInline):
     model = Answer
-
-
-class InterviewInline(admin.StackedInline):
-    model = Interview
+    extra = 0
 
 
 class PositionQuestionInline(admin.StackedInline):
     model = PositionQuestions
+    extra = 1
+
+
+class ThemeInline(admin.StackedInline):
+    model = Theme
     extra = 1
 
 
@@ -32,12 +34,30 @@ class CandidateAdmin(admin.ModelAdmin):
 
 @admin.register(Interview)
 class InterviewAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        'id',
+        'position',
+        'date',
+        'state',
+        'candidate',
+        'interviewer',
+    )
+    search_fields = ['candidate']
+    date_hierarchy = 'date'
+    list_filter = ['position', 'interviewer']
+    inlines = [AnswerInline]
 
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [PositionQuestionInline]
+    list_display = (
+        'text',
+        'category',
+        'theme'
+    )
+    list_filter = ['position', 'category', 'theme']
+    search_fields = ['text']
 
 
 @admin.register(Position)
@@ -47,10 +67,7 @@ class PositionAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    inlines = [ThemeInline]
 
 
-@admin.register(Theme)
-class ThemeAdmin(admin.ModelAdmin):
-    pass
 

@@ -28,25 +28,15 @@ class Candidate(models.Model):
         return f'{self.first_name} {self.last_name}'
 
 
-# class Interviewer(models.Model):
-#     email = models.EmailField(
-#         max_length = 255
-#     )
-#     first_name = models.CharField(
-#         _('first name'),
-#         max_length = 255
-#     )
-#     last_name = models.CharField(
-#         _('last name'),
-#         max_length = 255
-#     )
-
-
 class Category(models.Model):
     name = models.CharField(
         _('category name'),
         max_length = 255,
     )
+
+    class Meta:
+        verbose_name = 'category'
+        verbose_name_plural = 'categories'
 
     def __str__(self) -> str:
         return self.name
@@ -54,8 +44,16 @@ class Category(models.Model):
 
 class Theme(models.Model):
     name = models.CharField(
-        _('category name'),
+        _('theme name'),
         max_length = 255,
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete = models.CASCADE,
+        related_name = 'themes',
+        help_text = _(
+            'themes for specific category'
+        )
     )
 
     def __str__(self) -> str:
@@ -92,6 +90,9 @@ class Question(models.Model):
 
     def __str__(self) -> str:
         return self.text
+    
+    class Meta:
+        ordering = ['category', 'theme']
 
 
 class Position(models.Model):
@@ -101,7 +102,9 @@ class Position(models.Model):
         unique = True,
     )
     description = models.TextField(
-        _('description')
+        _('description'),
+        blank = True,
+        null = True,
     )
     questions = models.ManyToManyField(
         Question,
@@ -133,12 +136,14 @@ class PositionQuestions(models.Model):
 
 
 class Interview(models.Model):
-    class State(models.IntegerChoices):
-        CANCELED = 0, _('canceled')
-        SCHEDULED = 1, _('scheduled')
-        WAITING = 2, _('waiting')
-        PASSED = 3, _('passed')
-        FAILED = 4, _('failed')
+    class State(models.TextChoices):
+        CANCELED = 'canceled'
+        SCHEDULED = 'scheduled'
+        WAITING = 'waiting'
+        PASSED = 'passed'
+        FAILED = 'failed'
+
+    State.CANCELED.name
     
     candidate = models.ForeignKey(
         Candidate,
@@ -158,8 +163,9 @@ class Interview(models.Model):
             'Interview date and time'
         )
     )
-    state = models.IntegerField(
+    state = models.CharField(
         _('interview state'),
+        max_length = 255,
         choices = State.choices,
         default = State.SCHEDULED,
     )
@@ -184,7 +190,7 @@ class Answer(models.Model):
         Question,
         on_delete = models.CASCADE,
         verbose_name=_(
-            'interview'
+            'question'
         ),
         related_name = 'answers',
     )
@@ -198,3 +204,11 @@ class Answer(models.Model):
             'mark in range 0 - 10'
         )
     )
+    comment = models.TextField(
+        _('comment to answer'),
+        blank = True,
+        null = True,
+    )
+
+    class Meta:
+        unique_together = ['question', 'interview'] 
