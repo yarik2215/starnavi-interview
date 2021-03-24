@@ -12,18 +12,32 @@ from .models import (
 )
 
 
-class AnswerDetailSerializer(serializers.ModelSerializer):
+class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
         fields = '__all__'
 
 
-class AnswerCreateSerializer(AnswerDetailSerializer):
+class AnswerCreateSerializer(AnswerSerializer):
 
     class Meta:
         model = Answer
         exclude = ['interview']
+
+
+
+class AnswerDetailSerializer(AnswerSerializer):
+    question = serializers.CharField(source='question.text')
+
+    class Meta:
+        model = Answer
+        fields = ['question', 'mark', 'comment']
+
+
+class InterviewResultsSerializer(serializers.Serializer):
+    answers = AnswerDetailSerializer(many = True, read_only=True)
+    total_mark = serializers.IntegerField(read_only=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):

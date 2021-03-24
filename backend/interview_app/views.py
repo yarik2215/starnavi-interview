@@ -8,15 +8,17 @@ from django_filters import rest_framework as filters
 
 from .filters import InterviewFilter
 from .permissions import IsInterviewer
-from .models import Interview
+from .models import Interview, InterviewResult
 from .serializers import (
     InterviewSerializer,
     InterviewDetailSerializer,
-    AnswerDetailSerializer, 
+    AnswerSerializer, 
     AnswerCreateSerializer,
+    InterviewResultsSerializer,
 )
 
-class InterviewsViewSet(viewsets.ReadOnlyModelViewSet):
+
+class InterviewsViewSet(viewsets.ReadOnlyModelViewSet):            
     queryset = Interview.objects.all()
     serializer_class = InterviewSerializer
     permission_classes = [IsAuthenticated, IsInterviewer]
@@ -24,14 +26,17 @@ class InterviewsViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = InterviewFilter
 
     def get_queryset(self):
-        return self.queryset.filter(interviewer = self.request.user)
+        if self.request.user.id:
+            return self.queryset.filter(interviewer = self.request.user)
 
     def get_serializer_class(self):
         serializer = InterviewDetailSerializer
         if self.action == 'list':
             serializer = InterviewSerializer
         elif self.action == 'answer':
-            serializer = AnswerDetailSerializer
+            serializer = AnswerSerializer
+        elif self.action == 'results':
+            serializer = InterviewResultsSerializer
         return serializer
 
     @swagger_auto_schema(request_body=AnswerCreateSerializer)
@@ -44,4 +49,12 @@ class InterviewsViewSet(viewsets.ReadOnlyModelViewSet):
             serializer.save()
             return Response(data=serializer.data, status=200)
 
-
+    @action(methods=['GET'], detail=True)
+    def results(self, request, pk):
+        interview = Interview.objects.get(pk=pk)
+        answers = interview.answers.all()
+        result = InterviewResult(answers)
+        serializer = InterviewResultsSerializer(
+            result
+        )
+        return Response(data=serializer.data, status=200)

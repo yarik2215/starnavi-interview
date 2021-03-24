@@ -212,3 +212,9 @@ class Answer(models.Model):
 
     class Meta:
         unique_together = ['question', 'interview'] 
+
+
+class InterviewResult:
+    def __init__(self, answers) -> None:
+        self.answers = answers
+        self.total_mark = sum([a.mark for a in answers])
