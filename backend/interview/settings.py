@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'drf_yasg',
+    'rest_framework',
+    'rest_framework.authtoken',
 
     'interview_app',
 ]
@@ -134,4 +136,22 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = BASE_DIR / ".." / "static"
+# STATIC_ROOT = BASE_DIR / ".." / "static"
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        "rest_framework.authentication.TokenAuthentication",
+    ]
+}
+
+SWAGGER_SETTINGS = {
+    "USE_SESSION_AUTH": False,
+    "SECURITY_DEFINITIONS": {
+        "api_key": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization: Token [user_token]",
+        }
+    },
+}
