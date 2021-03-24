@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
 
     'interview_app',
 ]
@@ -136,13 +137,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# STATIC_ROOT = BASE_DIR / ".." / "static"
+STATIC_ROOT = BASE_DIR / ".." / "static"
 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         "rest_framework.authentication.TokenAuthentication",
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
 
 SWAGGER_SETTINGS = {
@@ -151,7 +155,7 @@ SWAGGER_SETTINGS = {
         "api_key": {
             "type": "apiKey",
             "in": "header",
-            "name": "Authorization: Token [user_token]",
+            "name": "Authorization",
         }
     },
 }

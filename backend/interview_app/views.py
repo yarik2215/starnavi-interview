@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
+from django_filters import rest_framework as filters
 
+from .filters import InterviewFilter
 from .permissions import IsInterviewer
 from .models import Interview
 from .serializers import (
@@ -15,9 +17,11 @@ from .serializers import (
 )
 
 class InterviewsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Interview.objects.filter(state=Interview.State.SCHEDULED)
+    queryset = Interview.objects.all()
     serializer_class = InterviewSerializer
     permission_classes = [IsAuthenticated, IsInterviewer]
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = InterviewFilter
 
     def get_queryset(self):
         return self.queryset.filter(interviewer = self.request.user)
